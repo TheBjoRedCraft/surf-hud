@@ -18,13 +18,16 @@ object ExampleHud {
     private val MUTED = TextColor.color(0xA9B4BE)
     private val DANGER = TextColor.color(0xFFA7B1)
 
+    private val BOSSBAR_ROWS = -1..2
+    private val ACTION_BAR_ROWS = -1..3
+
     private val clockFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
     private val ids = setOf(
         "online", "clock", "ping", "position",
         "single",
         "left-far", "left", "center", "right", "right-far", "bold", "plain", "smallcaps",
-    )
+    ) + rowIds()
 
     fun apply(player: Player) {
         show(player) {
@@ -68,6 +71,17 @@ object ExampleHud {
         }
     }
 
+    fun rows(player: Player) {
+        show(player) {
+            for (line in BOSSBAR_ROWS) {
+                line(line) { center("bossbar$line", labelled("Bossbar", "$line")) }
+            }
+            for (line in ACTION_BAR_ROWS) {
+                actionBar(line) { center("actionbar$line", labelled("Actionbar", "$line")) }
+            }
+        }
+    }
+
     fun clear(player: Player) {
         player.hud.remove(ids)
     }
@@ -88,7 +102,7 @@ object ExampleHud {
             actionBar(0) {
                 center("position", position(player))
             }
-            actionBar(1) {
+            actionBar(-1) {
                 element("online", -1, online())
                 element("ping", 1, ping(player))
             }
@@ -125,4 +139,6 @@ object ExampleHud {
             .append(Component.text("$label ", LABEL))
             .append(Component.text(value, valueColor))
             .build()
+
+    private fun rowIds() = BOSSBAR_ROWS.map { "bossbar$it" } + ACTION_BAR_ROWS.map { "actionbar$it" }
 }

@@ -9,7 +9,9 @@ annotation class HudDsl
 class HudBuilder {
     private val elements = LinkedHashMap<String, HudElement>()
 
-    fun line(line: Int, slot: DisplaySlot = DisplaySlot.BOSSBAR, block: HudLineBuilder.() -> Unit) {
+    fun line(line: Int, block: HudLineBuilder.() -> Unit) = line(line, DisplaySlot.BOSSBAR, block)
+
+    fun line(line: Int, slot: DisplaySlot, block: HudLineBuilder.() -> Unit) {
         HudLineBuilder(line, slot).apply(block).elements.forEach(::element)
     }
 
@@ -23,7 +25,7 @@ class HudBuilder {
 }
 
 @HudDsl
-class HudLineBuilder(val line: Int, val slot: DisplaySlot = DisplaySlot.BOSSBAR) {
+class HudLineBuilder @JvmOverloads constructor(val line: Int, val slot: DisplaySlot = DisplaySlot.BOSSBAR) {
     internal val elements = mutableListOf<HudElement>()
 
     fun element(id: String, position: Int, content: Component, background: Boolean = true) {

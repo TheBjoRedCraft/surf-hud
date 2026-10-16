@@ -17,17 +17,11 @@ object HudLayout {
         val lines = elements
             .groupBy { it.line }
             .toSortedMap()
-            .values
-            .take(theme.lines(slot))
 
         return Component.text()
-            .append(lines.mapIndexed { line, lineElements ->
-                composeLine(
-                    theme,
-                    theme.lineFont(slot, line),
-                    lineElements,
-                    render
-                )
+            .append(lines.mapNotNull { (line, lineElements) ->
+                val font = theme.lineFontOrNull(slot, line) ?: return@mapNotNull null
+                composeLine(theme, font, lineElements, render)
             })
             .build()
     }

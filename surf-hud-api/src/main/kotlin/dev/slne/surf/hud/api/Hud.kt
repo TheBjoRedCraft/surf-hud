@@ -21,6 +21,15 @@ interface Hud {
         slot: DisplaySlot = DisplaySlot.BOSSBAR,
     ) = add(HudElement(id, line, position, content, background, slot))
 
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    fun add(
+        id: String,
+        line: Int,
+        position: Int,
+        content: Component,
+        background: Boolean = true,
+    ) = add(id, line, position, content, background, DisplaySlot.BOSSBAR)
+
     fun add(elements: Collection<HudElement>)
 
     fun add(block: HudBuilder.() -> Unit) = add(HudBuilder().apply(block).build())

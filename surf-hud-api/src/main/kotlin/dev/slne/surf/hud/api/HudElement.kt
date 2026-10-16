@@ -12,6 +12,23 @@ data class HudElement(
 ) {
     init {
         require(id.isNotBlank()) { "HUD element id must not be blank" }
-        require(line >= 0) { "HUD line must not be negative, was $line" }
     }
+
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    constructor(
+        id: String,
+        line: Int,
+        position: Int,
+        content: Component,
+        background: Boolean = true,
+    ) : this(id, line, position, content, background, DisplaySlot.BOSSBAR)
+
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    fun copy(
+        id: String = this.id,
+        line: Int = this.line,
+        position: Int = this.position,
+        content: Component = this.content,
+        background: Boolean = this.background,
+    ) = copy(id, line, position, content, background, slot)
 }

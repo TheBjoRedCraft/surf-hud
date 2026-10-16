@@ -4,8 +4,8 @@ import dev.slne.surf.hud.api.DisplaySlot
 import net.kyori.adventure.key.Key
 
 data class HudTheme(
-    val bossBarFonts: List<Key> = listOf(Key.key("surf", "hud"), Key.key("surf", "hud2")),
-    val actionBarFonts: List<Key> = listOf(Key.key("surf", "actionbar"), Key.key("surf", "actionbar2")),
+    /** The fonts of the [DisplaySlot.BOSSBAR] lines from line 0 downwards. */
+    val lineFonts: List<Key> = DEFAULT_LINE_FONTS,
     val spaceFont: Key = Key.key("surf", "space"),
     val pillCap: HudGlyph = HudGlyph('', 1),
     val pillSegments: List<HudGlyph> = binaryGlyphs(0xE002, 128),
@@ -14,9 +14,15 @@ data class HudTheme(
     val paddingLeft: Int = 5,
     val paddingRight: Int = 4,
     val gap: Int = 3,
+    /** The fonts of the [DisplaySlot.ACTIONBAR] lines from line 0 downwards. */
+    val actionBarFonts: List<Key> = DEFAULT_ACTION_BAR_FONTS,
+    /** The fonts of the [DisplaySlot.BOSSBAR] lines from line -1 upwards. */
+    val lineFontsAbove: List<Key> = DEFAULT_LINE_FONTS_ABOVE,
+    /** The fonts of the [DisplaySlot.ACTIONBAR] lines from line -1 upwards. */
+    val actionBarFontsAbove: List<Key> = DEFAULT_ACTION_BAR_FONTS_ABOVE,
 ) {
     init {
-        require(bossBarFonts.isNotEmpty()) { "At least one boss bar font is required" }
+        require(lineFonts.isNotEmpty()) { "At least one line font is required" }
         require(actionBarFonts.isNotEmpty()) { "At least one action bar font is required" }
         require(pillSegments.any { it.width == 1 }) { "Pill segments require a glyph of width 1" }
         require(negativeSpaces.any { it.width == 1 }) { "Negative spaces require a glyph of width 1" }
@@ -26,17 +32,66 @@ data class HudTheme(
         require(gap >= 0) { "Gap must not be negative" }
     }
 
-    fun lineFonts(slot: DisplaySlot): List<Key> = when (slot) {
-        DisplaySlot.BOSSBAR -> bossBarFonts
-        DisplaySlot.ACTIONBAR -> actionBarFonts
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    constructor(
+        lineFonts: List<Key> = DEFAULT_LINE_FONTS,
+        spaceFont: Key = Key.key("surf", "space"),
+        pillCap: HudGlyph = HudGlyph('', 1),
+        pillSegments: List<HudGlyph> = binaryGlyphs(0xE002, 128),
+        negativeSpaces: List<HudGlyph> = binaryGlyphs(0xF801, 256),
+        positiveSpaces: List<HudGlyph> = binaryGlyphs(0xF821, 256),
+        paddingLeft: Int = 5,
+        paddingRight: Int = 4,
+        gap: Int = 3,
+    ) : this(
+        lineFonts, spaceFont, pillCap, pillSegments, negativeSpaces, positiveSpaces,
+        paddingLeft, paddingRight, gap,
+    )
+
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    fun copy(
+        lineFonts: List<Key> = this.lineFonts,
+        spaceFont: Key = this.spaceFont,
+        pillCap: HudGlyph = this.pillCap,
+        pillSegments: List<HudGlyph> = this.pillSegments,
+        negativeSpaces: List<HudGlyph> = this.negativeSpaces,
+        positiveSpaces: List<HudGlyph> = this.positiveSpaces,
+        paddingLeft: Int = this.paddingLeft,
+        paddingRight: Int = this.paddingRight,
+        gap: Int = this.gap,
+    ) = copy(
+        lineFonts, spaceFont, pillCap, pillSegments, negativeSpaces, positiveSpaces,
+        paddingLeft, paddingRight, gap, actionBarFonts, lineFontsAbove, actionBarFontsAbove,
+    )
+
+    /** The number of [DisplaySlot.BOSSBAR] lines. */
+    val lines: Int get() = lineFonts.size
+
+    /** The font of a [DisplaySlot.BOSSBAR] line. */
+    fun lineFont(line: Int): Key = lineFont(DisplaySlot.BOSSBAR, line)
+
+    fun lineFontOrNull(slot: DisplaySlot, line: Int): Key? {
+        val (below, above) = when (slot) {
+            DisplaySlot.BOSSBAR -> lineFonts to lineFontsAbove
+            DisplaySlot.ACTIONBAR -> actionBarFonts to actionBarFontsAbove
+        }
+        return if (line >= 0) below.getOrNull(line) else above.getOrNull(-line - 1)
     }
 
-    fun lines(slot: DisplaySlot): Int = lineFonts(slot).size
-
-    fun lineFont(slot: DisplaySlot, line: Int): Key = lineFonts(slot).getOrNull(line)
-        ?: throw IllegalArgumentException("HUD line $line is not supported in $slot, theme only provides ${lines(slot)} lines")
+    fun lineFont(slot: DisplaySlot, line: Int): Key = lineFontOrNull(slot, line)
+        ?: throw IllegalArgumentException("HUD line $line is not supported in $slot by this theme")
 
     companion object {
+        private val DEFAULT_LINE_FONTS = listOf(Key.key("surf", "hud"), Key.key("surf", "hud2"), Key.key("surf", "hud3"))
+        private val DEFAULT_LINE_FONTS_ABOVE = listOf(Key.key("surf", "hud_above1"))
+        private val DEFAULT_ACTION_BAR_FONTS = listOf(
+            Key.key("surf", "actionbar"),
+            Key.key("surf", "actionbar_below1"),
+            Key.key("surf", "actionbar_below2"),
+            Key.key("surf", "actionbar_below3"),
+        )
+        private val DEFAULT_ACTION_BAR_FONTS_ABOVE = listOf(Key.key("surf", "actionbar2"))
+
         private fun binaryGlyphs(firstCodePoint: Int, largest: Int): List<HudGlyph> =
             generateSequence(1) { it * 2 }
                 .takeWhile { it <= largest }
