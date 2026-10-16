@@ -5,6 +5,7 @@ import dev.slne.surf.hud.api.Hud
 import dev.slne.surf.hud.api.HudElement
 import dev.slne.surf.hud.api.theme.HudTheme
 import dev.slne.surf.hud.core.layout.HudLayout
+import dev.slne.surf.hud.core.platform.HudHands
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.identity.Identity
@@ -33,6 +34,9 @@ class HudImpl(
 
     @Volatile
     private var actionBarSentAt = 0L
+
+    @Volatile
+    private var hands = HudHands.DEFAULT
 
     override var visible: Boolean = true
         set(value) {
@@ -91,7 +95,12 @@ class HudImpl(
         }
     }
 
-    fun flush(audience: Audience, theme: HudTheme) {
+    fun flush(audience: Audience, theme: HudTheme, hands: HudHands) {
+        if (hands != this.hands) {
+            this.hands = hands
+            dirty = true
+        }
+
         if (!dirty && !actionBarExpired()) {
             return
         }
@@ -129,8 +138,21 @@ class HudImpl(
             HudLayout.compose(theme, slot, elements) { GlobalTranslator.render(it, locale) }
         }
 
+        fun side(slot: DisplaySlot) = slots[slot]?.let { elements ->
+            HudLayout.composeSide(theme, slot, hands, elements) { GlobalTranslator.render(it, locale) }
+        }
+
+        // The action bar is a single message, so the hotbar and screen edge sides travel along with it
+        val actionBar = listOfNotNull(
+            layout(DisplaySlot.ACTIONBAR),
+            side(DisplaySlot.HOTBAR_LEFT),
+            side(DisplaySlot.HOTBAR_RIGHT),
+            side(DisplaySlot.SCREEN_LEFT),
+            side(DisplaySlot.SCREEN_RIGHT),
+        ).takeIf { it.isNotEmpty() }?.let { Component.text().append(it).build() }
+
         showBossBar(audience, layout(DisplaySlot.BOSSBAR))
-        showActionBar(audience, layout(DisplaySlot.ACTIONBAR))
+        showActionBar(audience, actionBar)
     }
 
     private fun showBossBar(audience: Audience, composed: Component?) {

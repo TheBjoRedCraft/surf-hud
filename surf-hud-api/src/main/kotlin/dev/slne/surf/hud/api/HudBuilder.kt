@@ -17,6 +17,14 @@ class HudBuilder {
 
     fun actionBar(line: Int = 0, block: HudLineBuilder.() -> Unit) = line(line, DisplaySlot.ACTIONBAR, block)
 
+    fun hotbarLeft(block: HudLineBuilder.() -> Unit) = line(0, DisplaySlot.HOTBAR_LEFT, block)
+
+    fun hotbarRight(block: HudLineBuilder.() -> Unit) = line(0, DisplaySlot.HOTBAR_RIGHT, block)
+
+    fun screenLeft(line: Int = 0, block: HudLineBuilder.() -> Unit) = line(line, DisplaySlot.SCREEN_LEFT, block)
+
+    fun screenRight(line: Int = 0, block: HudLineBuilder.() -> Unit) = line(line, DisplaySlot.SCREEN_RIGHT, block)
+
     fun element(element: HudElement) {
         elements[element.id] = element
     }

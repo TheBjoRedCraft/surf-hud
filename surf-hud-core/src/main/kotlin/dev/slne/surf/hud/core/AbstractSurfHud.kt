@@ -28,7 +28,7 @@ abstract class AbstractSurfHud : SurfHud {
 
     fun flush(hud: HudImpl) {
         val audience = platform.viewer(hud.viewer) ?: return
-        hud.flush(audience, theme)
+        hud.flush(audience, theme, platform.hands(hud.viewer))
     }
 
     fun tick() {

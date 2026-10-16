@@ -5,4 +5,6 @@ import java.util.*
 
 interface HudPlatform {
     fun viewer(uuid: UUID): Audience?
+
+    fun hands(uuid: UUID): HudHands
 }
