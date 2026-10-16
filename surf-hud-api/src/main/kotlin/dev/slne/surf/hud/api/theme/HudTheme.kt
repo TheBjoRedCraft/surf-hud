@@ -32,6 +32,10 @@ data class HudTheme(
      * the crosshair, so none is kept by default; 24 clears it.
      */
     val attackIndicatorWidth: Int = 0,
+    /** The fonts of the hotbar text rows in its upper half, from line -1 upwards. */
+    val hotbarFontsAbove: List<Key> = listOf(Key.key("surf", "hotbar_above1")),
+    /** The fonts of the hotbar text rows in its lower half, from line 1 downwards. */
+    val hotbarFontsBelow: List<Key> = listOf(Key.key("surf", "hotbar_below1")),
 ) {
     init {
         require(lineFonts.isNotEmpty()) { "At least one line font is required" }
@@ -77,7 +81,7 @@ data class HudTheme(
     ) = copy(
         lineFonts, spaceFont, pillCap, pillSegments, negativeSpaces, positiveSpaces,
         paddingLeft, paddingRight, gap, actionBarFonts, lineFontsAbove, actionBarFontsAbove,
-        hotbarFont, hotbarGap, offhandWidth, attackIndicatorWidth,
+        hotbarFont, hotbarGap, offhandWidth, attackIndicatorWidth, hotbarFontsAbove, hotbarFontsBelow,
     )
 
     /** The number of [DisplaySlot.BOSSBAR] lines. */
@@ -90,7 +94,7 @@ data class HudTheme(
         val (below, above) = when (slot) {
             DisplaySlot.BOSSBAR -> lineFonts to lineFontsAbove
             DisplaySlot.ACTIONBAR -> actionBarFonts to actionBarFontsAbove
-            DisplaySlot.HOTBAR_LEFT, DisplaySlot.HOTBAR_RIGHT -> return hotbarFont.takeIf { line == 0 }
+            DisplaySlot.HOTBAR_LEFT, DisplaySlot.HOTBAR_RIGHT -> (listOf(hotbarFont) + hotbarFontsBelow) to hotbarFontsAbove
         }
         return if (line >= 0) below.getOrNull(line) else above.getOrNull(-line - 1)
     }

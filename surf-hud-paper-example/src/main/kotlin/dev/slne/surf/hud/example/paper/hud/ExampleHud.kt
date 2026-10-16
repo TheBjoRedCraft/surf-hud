@@ -9,6 +9,7 @@ import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -21,6 +22,7 @@ object ExampleHud {
     private val BOSSBAR_ROWS = -1..2
     private val ACTION_BAR_ROWS = -1..3
     private val HOTBAR_POSITIONS = 0..1
+    private val HOTBAR_TEXT_ROWS = listOf(-1, 1)
 
     private val clockFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
@@ -90,6 +92,35 @@ object ExampleHud {
                     element("hotbar-right$position", position, labelled("Rechts", "$position"))
                 }
             }
+            for (line in HOTBAR_TEXT_ROWS) {
+                hotbarLeft(line) { element("hotbar-left-text$line", 0, labelled("Links", "$line")) }
+                hotbarRight(line) {
+                    element(
+                        "hotbar-right-text$line",
+                        0,
+                        labelled("Rechts", "$line")
+                    )
+                }
+            }
+        }
+    }
+
+    fun hotbarText(player: Player) {
+        show(player) {
+            hotbarRight(-1) {
+                element(
+                    "hotbar-right-text-1",
+                    0,
+                    Component.text("DEV".toSmallCaps(), MUTED)
+                )
+            }
+            hotbarRight(1) {
+                element(
+                    "hotbar-right-text1",
+                    0,
+                    Component.text("PLAYTEST (${LocalDate.now()})".toSmallCaps(), MUTED)
+                )
+            }
         }
     }
 
@@ -151,6 +182,8 @@ object ExampleHud {
             .append(Component.text(value, valueColor))
             .build()
 
-    private fun rowIds() = BOSSBAR_ROWS.map { "bossbar$it" } + ACTION_BAR_ROWS.map { "actionbar$it" } +
-            HOTBAR_POSITIONS.flatMap { listOf("hotbar-left$it", "hotbar-right$it") }
+    private fun rowIds() =
+        BOSSBAR_ROWS.map { "bossbar$it" } + ACTION_BAR_ROWS.map { "actionbar$it" } +
+                HOTBAR_POSITIONS.flatMap { listOf("hotbar-left$it", "hotbar-right$it") } +
+                HOTBAR_TEXT_ROWS.flatMap { listOf("hotbar-left-text$it", "hotbar-right-text$it") }
 }

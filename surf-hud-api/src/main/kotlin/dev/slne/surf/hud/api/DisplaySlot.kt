@@ -17,14 +17,15 @@ enum class DisplaySlot {
     ACTIONBAR,
 
     /**
-     * Left of the hotbar, on line 0 only. Elements line up outwards: the lowest position sits next
-     * to the hotbar, higher positions further left. Room is left for the offhand slot when the
-     * offhand slot is shown on this side.
+     * Left of the hotbar. Line 0 is centered on the hotbar; lines -1 and 1 are two smaller text rows
+     * in its upper and lower half, which the [HudBuilder] gives no background by default. Elements
+     * line up outwards: the lowest position sits next to the hotbar, higher positions further left.
+     * Room is left for the offhand slot when the offhand slot is shown on this side.
      */
     HOTBAR_LEFT,
 
     /**
-     * Right of the hotbar, on line 0 only; the mirror image of [HOTBAR_LEFT].
+     * Right of the hotbar; the mirror image of [HOTBAR_LEFT].
      */
     HOTBAR_RIGHT,
 }
