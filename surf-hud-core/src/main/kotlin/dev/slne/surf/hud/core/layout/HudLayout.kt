@@ -30,9 +30,8 @@ object HudLayout {
     }
 
     /**
-     * Lines [elements] up from an anchor of [slot]: outwards from the hotbar edges, or inwards from
-     * the screen edges, where the text shader moves them. Like every line the result has no net
-     * width, so the centered action bar keeps it in place.
+     * Lines [elements] up beside the hotbar on the side of [slot], outwards from the hotbar edge.
+     * Like every line the result has no net width, so the centered action bar keeps it in place.
      */
     fun composeSide(
         theme: HudTheme,
@@ -41,12 +40,9 @@ object HudLayout {
         elements: Collection<HudElement>,
         render: (Component) -> Component,
     ): Component? {
-        val towardsLeft = slot == DisplaySlot.HOTBAR_LEFT || slot == DisplaySlot.SCREEN_RIGHT
-        val distance = when (slot) {
-            DisplaySlot.HOTBAR_LEFT, DisplaySlot.HOTBAR_RIGHT -> hotbarDistance(theme, slot, hands)
-            DisplaySlot.SCREEN_LEFT, DisplaySlot.SCREEN_RIGHT -> theme.screenEdgeMargin
-            else -> throw IllegalArgumentException("$slot is not a side slot")
-        }
+        require(slot == DisplaySlot.HOTBAR_LEFT || slot == DisplaySlot.HOTBAR_RIGHT) { "$slot is not a hotbar slot" }
+        val towardsLeft = slot == DisplaySlot.HOTBAR_LEFT
+        val distance = hotbarDistance(theme, slot, hands)
 
         val lines = elements
             .groupBy { it.line }

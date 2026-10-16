@@ -21,7 +21,6 @@ object ExampleHud {
     private val BOSSBAR_ROWS = -1..2
     private val ACTION_BAR_ROWS = -1..3
     private val HOTBAR_POSITIONS = 0..1
-    private val SCREEN_EDGE_ROWS = -2..2
 
     private val clockFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
@@ -91,10 +90,6 @@ object ExampleHud {
                     element("hotbar-right$position", position, labelled("Rechts", "$position"))
                 }
             }
-            for (line in SCREEN_EDGE_ROWS) {
-                screenLeft(line) { element("screen-left$line", 0, labelled("Rand links", "$line")) }
-                screenRight(line) { element("screen-right$line", 0, labelled("Rand rechts", "$line")) }
-            }
         }
     }
 
@@ -157,6 +152,5 @@ object ExampleHud {
             .build()
 
     private fun rowIds() = BOSSBAR_ROWS.map { "bossbar$it" } + ACTION_BAR_ROWS.map { "actionbar$it" } +
-            HOTBAR_POSITIONS.flatMap { listOf("hotbar-left$it", "hotbar-right$it") } +
-            SCREEN_EDGE_ROWS.flatMap { listOf("screen-left$it", "screen-right$it") }
+            HOTBAR_POSITIONS.flatMap { listOf("hotbar-left$it", "hotbar-right$it") }
 }

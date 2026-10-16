@@ -32,16 +32,6 @@ data class HudTheme(
      * the crosshair, so none is kept by default; 24 clears it.
      */
     val attackIndicatorWidth: Int = 0,
-    /** The fonts of the [DisplaySlot.SCREEN_LEFT] lines from line 0 downwards. */
-    val screenLeftFonts: List<Key> = edgeFonts("screen_left", "below"),
-    /** The fonts of the [DisplaySlot.SCREEN_LEFT] lines from line -1 upwards. */
-    val screenLeftFontsAbove: List<Key> = edgeFonts("screen_left", "above").drop(1),
-    /** The fonts of the [DisplaySlot.SCREEN_RIGHT] lines from line 0 downwards. */
-    val screenRightFonts: List<Key> = edgeFonts("screen_right", "below"),
-    /** The fonts of the [DisplaySlot.SCREEN_RIGHT] lines from line -1 upwards. */
-    val screenRightFontsAbove: List<Key> = edgeFonts("screen_right", "above").drop(1),
-    /** The distance between a screen edge and the first element beside it. */
-    val screenEdgeMargin: Int = 4,
 ) {
     init {
         require(lineFonts.isNotEmpty()) { "At least one line font is required" }
@@ -55,7 +45,6 @@ data class HudTheme(
         require(hotbarGap >= 0) { "Hotbar gap must not be negative" }
         require(offhandWidth >= 0) { "Offhand width must not be negative" }
         require(attackIndicatorWidth >= 0) { "Attack indicator width must not be negative" }
-        require(screenEdgeMargin >= 0) { "Screen edge margin must not be negative" }
     }
 
     @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
@@ -89,7 +78,6 @@ data class HudTheme(
         lineFonts, spaceFont, pillCap, pillSegments, negativeSpaces, positiveSpaces,
         paddingLeft, paddingRight, gap, actionBarFonts, lineFontsAbove, actionBarFontsAbove,
         hotbarFont, hotbarGap, offhandWidth, attackIndicatorWidth,
-        screenLeftFonts, screenLeftFontsAbove, screenRightFonts, screenRightFontsAbove, screenEdgeMargin,
     )
 
     /** The number of [DisplaySlot.BOSSBAR] lines. */
@@ -103,8 +91,6 @@ data class HudTheme(
             DisplaySlot.BOSSBAR -> lineFonts to lineFontsAbove
             DisplaySlot.ACTIONBAR -> actionBarFonts to actionBarFontsAbove
             DisplaySlot.HOTBAR_LEFT, DisplaySlot.HOTBAR_RIGHT -> return hotbarFont.takeIf { line == 0 }
-            DisplaySlot.SCREEN_LEFT -> screenLeftFonts to screenLeftFontsAbove
-            DisplaySlot.SCREEN_RIGHT -> screenRightFonts to screenRightFontsAbove
         }
         return if (line >= 0) below.getOrNull(line) else above.getOrNull(-line - 1)
     }
@@ -122,10 +108,6 @@ data class HudTheme(
             Key.key("surf", "actionbar_below3"),
         )
         private val DEFAULT_ACTION_BAR_FONTS_ABOVE = listOf(Key.key("surf", "actionbar2"))
-
-        /** `surf:<edge>`, then `surf:<edge>_<direction>1` and `surf:<edge>_<direction>2`. */
-        private fun edgeFonts(edge: String, direction: String) =
-            listOf(Key.key("surf", edge)) + (1..2).map { Key.key("surf", "${edge}_$direction$it") }
 
         private fun binaryGlyphs(firstCodePoint: Int, largest: Int): List<HudGlyph> =
             generateSequence(1) { it * 2 }

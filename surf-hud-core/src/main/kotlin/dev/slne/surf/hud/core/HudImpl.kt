@@ -142,13 +142,11 @@ class HudImpl(
             HudLayout.composeSide(theme, slot, hands, elements) { GlobalTranslator.render(it, locale) }
         }
 
-        // The action bar is a single message, so the hotbar and screen edge sides travel along with it
+        // The action bar is a single message, so the hotbar sides travel along with it
         val actionBar = listOfNotNull(
             layout(DisplaySlot.ACTIONBAR),
             side(DisplaySlot.HOTBAR_LEFT),
             side(DisplaySlot.HOTBAR_RIGHT),
-            side(DisplaySlot.SCREEN_LEFT),
-            side(DisplaySlot.SCREEN_RIGHT),
         ).takeIf { it.isNotEmpty() }?.let { Component.text().append(it).build() }
 
         showBossBar(audience, layout(DisplaySlot.BOSSBAR))

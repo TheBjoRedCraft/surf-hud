@@ -27,18 +27,4 @@ enum class DisplaySlot {
      * Right of the hotbar, on line 0 only; the mirror image of [HOTBAR_LEFT].
      */
     HOTBAR_RIGHT,
-
-    /**
-     * At the left edge of the screen, line 0 centered vertically, lines -2 to 2. Elements line up
-     * from the edge towards the middle: the lowest position sits at the edge.
-     *
-     * The client cannot be told the screen width, so the resource pack's text shader moves these
-     * glyphs to the edge; without it they are not visible.
-     */
-    SCREEN_LEFT,
-
-    /**
-     * At the right edge of the screen; the mirror image of [SCREEN_LEFT].
-     */
-    SCREEN_RIGHT,
 }
