@@ -142,7 +142,6 @@ class HudImpl(
             HudLayout.composeSide(theme, slot, hands, elements) { GlobalTranslator.render(it, locale) }
         }
 
-        // The action bar is a single message, so the hotbar sides travel along with it
         val actionBar = listOfNotNull(
             layout(DisplaySlot.ACTIONBAR),
             side(DisplaySlot.HOTBAR_LEFT),
@@ -216,7 +215,6 @@ class HudImpl(
     }
 
     private companion object {
-        // The client fades the action bar out after three seconds, so it is resent well before that
         val ACTION_BAR_RESEND_NANOS = TimeUnit.SECONDS.toNanos(1)
     }
 }
