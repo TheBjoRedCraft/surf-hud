@@ -1,9 +1,11 @@
 package dev.slne.surf.hud.api.theme
 
+import dev.slne.surf.hud.api.DisplaySlot
 import net.kyori.adventure.key.Key
 
 data class HudTheme(
-    val lineFonts: List<Key> = listOf(Key.key("surf", "hud"), Key.key("surf", "hud2")),
+    val bossBarFonts: List<Key> = listOf(Key.key("surf", "hud"), Key.key("surf", "hud2")),
+    val actionBarFonts: List<Key> = listOf(Key.key("surf", "actionbar"), Key.key("surf", "actionbar2")),
     val spaceFont: Key = Key.key("surf", "space"),
     val pillCap: HudGlyph = HudGlyph('', 1),
     val pillSegments: List<HudGlyph> = binaryGlyphs(0xE002, 128),
@@ -14,7 +16,8 @@ data class HudTheme(
     val gap: Int = 3,
 ) {
     init {
-        require(lineFonts.isNotEmpty()) { "At least one line font is required" }
+        require(bossBarFonts.isNotEmpty()) { "At least one boss bar font is required" }
+        require(actionBarFonts.isNotEmpty()) { "At least one action bar font is required" }
         require(pillSegments.any { it.width == 1 }) { "Pill segments require a glyph of width 1" }
         require(negativeSpaces.any { it.width == 1 }) { "Negative spaces require a glyph of width 1" }
         require(positiveSpaces.any { it.width == 1 }) { "Positive spaces require a glyph of width 1" }
@@ -23,10 +26,15 @@ data class HudTheme(
         require(gap >= 0) { "Gap must not be negative" }
     }
 
-    val lines: Int get() = lineFonts.size
+    fun lineFonts(slot: DisplaySlot): List<Key> = when (slot) {
+        DisplaySlot.BOSSBAR -> bossBarFonts
+        DisplaySlot.ACTIONBAR -> actionBarFonts
+    }
 
-    fun lineFont(line: Int): Key = lineFonts.getOrNull(line)
-        ?: throw IllegalArgumentException("HUD line $line is not supported, theme only provides $lines lines")
+    fun lines(slot: DisplaySlot): Int = lineFonts(slot).size
+
+    fun lineFont(slot: DisplaySlot, line: Int): Key = lineFonts(slot).getOrNull(line)
+        ?: throw IllegalArgumentException("HUD line $line is not supported in $slot, theme only provides ${lines(slot)} lines")
 
     companion object {
         private fun binaryGlyphs(firstCodePoint: Int, largest: Int): List<HudGlyph> =

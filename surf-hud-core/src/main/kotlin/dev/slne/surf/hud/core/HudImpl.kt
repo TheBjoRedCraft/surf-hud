@@ -1,5 +1,6 @@
 package dev.slne.surf.hud.core
 
+import dev.slne.surf.hud.api.DisplaySlot
 import dev.slne.surf.hud.api.Hud
 import dev.slne.surf.hud.api.HudElement
 import dev.slne.surf.hud.api.theme.HudTheme
@@ -10,6 +11,7 @@ import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.translation.GlobalTranslator
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class HudImpl(
     override val viewer: UUID,
@@ -23,7 +25,14 @@ class HudImpl(
     @Volatile
     private var dirty = true
     private var shownTo: Audience? = null
-    private var lastContent: Component? = null
+    private var bossBarShown = false
+    private var bossBarContent: Component? = null
+
+    @Volatile
+    private var actionBarContent: Component? = null
+
+    @Volatile
+    private var actionBarSentAt = 0L
 
     override var visible: Boolean = true
         set(value) {
@@ -75,37 +84,34 @@ class HudImpl(
     fun invalidate() {
         synchronized(lock) {
             shownTo = null
-            lastContent = null
+            bossBarShown = false
+            bossBarContent = null
+            actionBarContent = null
             dirty = true
         }
     }
 
     fun flush(audience: Audience, theme: HudTheme) {
-        if (!dirty) {
+        if (!dirty && !actionBarExpired()) {
             return
         }
 
         synchronized(lock) {
-            dirty = false
-
-            if (!visible || content.isEmpty()) {
-                hide()
-                return
-            }
-
-            val locale = audience.get(Identity.LOCALE).orElse(Locale.US)
-            val composed = HudLayout.compose(theme, content.values) { GlobalTranslator.render(it, locale) }
-
-            if (lastContent != composed) {
-                lastContent = composed
-                bar.name(composed)
-            }
-
             if (shownTo !== audience) {
                 shownTo?.let(::hideFrom)
-                audience.showBossBar(spacer)
-                audience.showBossBar(bar)
                 shownTo = audience
+                dirty = true
+            }
+
+            if (dirty) {
+                dirty = false
+                compose(audience, theme)
+            }
+
+            val actionBar = actionBarContent
+            if (actionBar != null && actionBarExpired()) {
+                audience.sendActionBar(actionBar)
+                actionBarSentAt = System.nanoTime()
             }
         }
     }
@@ -115,9 +121,71 @@ class HudImpl(
         shownTo = null
     }
 
+    private fun compose(audience: Audience, theme: HudTheme) {
+        val slots = if (visible) content.values.groupBy { it.slot } else emptyMap()
+        val locale = audience.get(Identity.LOCALE).orElse(Locale.US)
+
+        fun layout(slot: DisplaySlot) = slots[slot]?.let { elements ->
+            HudLayout.compose(theme, slot, elements) { GlobalTranslator.render(it, locale) }
+        }
+
+        showBossBar(audience, layout(DisplaySlot.BOSSBAR))
+        showActionBar(audience, layout(DisplaySlot.ACTIONBAR))
+    }
+
+    private fun showBossBar(audience: Audience, composed: Component?) {
+        if (composed == null) {
+            hideBossBar(audience)
+            return
+        }
+
+        if (bossBarContent != composed) {
+            bossBarContent = composed
+            bar.name(composed)
+        }
+
+        if (!bossBarShown) {
+            audience.showBossBar(spacer)
+            audience.showBossBar(bar)
+            bossBarShown = true
+        }
+    }
+
+    private fun showActionBar(audience: Audience, composed: Component?) {
+        if (composed == actionBarContent) {
+            return
+        }
+
+        if (composed == null) {
+            hideActionBar(audience)
+            return
+        }
+
+        actionBarContent = composed
+        actionBarSentAt = System.nanoTime() - ACTION_BAR_RESEND_NANOS
+    }
+
+    private fun actionBarExpired() =
+        actionBarContent != null && System.nanoTime() - actionBarSentAt >= ACTION_BAR_RESEND_NANOS
+
     private fun hideFrom(audience: Audience) {
-        audience.hideBossBar(spacer)
-        audience.hideBossBar(bar)
+        hideBossBar(audience)
+        hideActionBar(audience)
+    }
+
+    private fun hideBossBar(audience: Audience) {
+        if (bossBarShown) {
+            audience.hideBossBar(spacer)
+            audience.hideBossBar(bar)
+            bossBarShown = false
+        }
+    }
+
+    private fun hideActionBar(audience: Audience) {
+        if (actionBarContent != null) {
+            audience.sendActionBar(Component.empty())
+            actionBarContent = null
+        }
     }
 
     private inline fun modify(block: () -> Unit) {
@@ -125,5 +193,10 @@ class HudImpl(
             block()
             dirty = true
         }
+    }
+
+    private companion object {
+        // The client fades the action bar out after three seconds, so it is resent well before that
+        val ACTION_BAR_RESEND_NANOS = TimeUnit.SECONDS.toNanos(1)
     }
 }

@@ -18,7 +18,8 @@ interface Hud {
         position: Int,
         content: Component,
         background: Boolean = true,
-    ) = add(HudElement(id, line, position, content, background))
+        slot: DisplaySlot = DisplaySlot.BOSSBAR,
+    ) = add(HudElement(id, line, position, content, background, slot))
 
     fun add(elements: Collection<HudElement>)
 

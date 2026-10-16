@@ -1,13 +1,16 @@
 package dev.slne.surf.hud.core.layout
 
+import dev.slne.surf.hud.api.DisplaySlot
 import dev.slne.surf.hud.api.HudElement
 import dev.slne.surf.hud.api.theme.HudTheme
 import dev.slne.surf.hud.core.layout.component.ComponentWidths
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 
 object HudLayout {
     fun compose(
         theme: HudTheme,
+        slot: DisplaySlot,
         elements: Collection<HudElement>,
         render: (Component) -> Component,
     ): Component {
@@ -15,13 +18,13 @@ object HudLayout {
             .groupBy { it.line }
             .toSortedMap()
             .values
-            .take(theme.lines)
+            .take(theme.lines(slot))
 
         return Component.text()
             .append(lines.mapIndexed { line, lineElements ->
                 composeLine(
                     theme,
-                    line,
+                    theme.lineFont(slot, line),
                     lineElements,
                     render
                 )
@@ -31,11 +34,10 @@ object HudLayout {
 
     private fun composeLine(
         theme: HudTheme,
-        line: Int,
+        font: Key,
         elements: List<HudElement>,
         render: (Component) -> Component,
     ): Component {
-        val font = theme.lineFont(line)
         val sorted = elements.sortedBy { it.position }
         val parts = sorted.map { element ->
             val rendered = render(element.content)

@@ -80,6 +80,21 @@ object ExampleHud {
         hud.remove(ids - elements.mapTo(HashSet()) { it.id })
     }
 
+    fun actionBar(player: Player) {
+        show(player) {
+            line(0) {
+                center("clock", clock())
+            }
+            actionBar(0) {
+                center("position", position(player))
+            }
+            actionBar(1) {
+                element("online", -1, online())
+                element("ping", 1, ping(player))
+            }
+        }
+    }
+
     fun update() {
         Bukkit.getOnlinePlayers().forEach { player ->
             val hud = player.hud

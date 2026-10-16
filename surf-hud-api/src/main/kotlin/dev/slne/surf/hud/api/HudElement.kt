@@ -8,6 +8,7 @@ data class HudElement(
     val position: Int,
     val content: Component,
     val background: Boolean = true,
+    val slot: DisplaySlot = DisplaySlot.BOSSBAR,
 ) {
     init {
         require(id.isNotBlank()) { "HUD element id must not be blank" }

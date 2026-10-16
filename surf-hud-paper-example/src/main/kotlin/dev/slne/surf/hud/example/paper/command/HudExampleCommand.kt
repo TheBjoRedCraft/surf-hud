@@ -21,6 +21,10 @@ fun hudExampleCommand() = commandTree("hudexample") {
         playerExecutor { player, _ -> ExampleHud.banner(player) }
     }
 
+    literalArgument("actionbar") {
+        playerExecutor { player, _ -> ExampleHud.actionBar(player) }
+    }
+
     literalArgument("toggle") {
         playerExecutor { player, _ ->
             val hud = player.hud
