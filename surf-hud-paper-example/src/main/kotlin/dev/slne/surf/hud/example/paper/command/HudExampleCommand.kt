@@ -25,6 +25,10 @@ fun hudExampleCommand() = commandTree("hudexample") {
         playerExecutor { player, _ -> ExampleHud.actionBar(player) }
     }
 
+    literalArgument("watermark") {
+        playerExecutor { player, _ -> ExampleHud.watermark(player) }
+    }
+
     literalArgument("hotbartext") {
         playerExecutor { player, _ -> ExampleHud.hotbarText(player) }
     }

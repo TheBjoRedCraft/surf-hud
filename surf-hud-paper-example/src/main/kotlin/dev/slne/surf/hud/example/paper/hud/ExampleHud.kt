@@ -1,6 +1,7 @@
 package dev.slne.surf.hud.example.paper.hud
 
 import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.hud.api.HudBuilder
 import dev.slne.surf.hud.api.buildHud
 import dev.slne.surf.hud.api.hud
@@ -134,6 +135,29 @@ object ExampleHud {
 
         hud.add(elements)
         hud.remove(ids - elements.mapTo(HashSet()) { it.id })
+    }
+
+    fun watermark(player: Player) {
+        show(player) {
+            hotbarRight(-1) {
+                element(
+                    "watermark-1",
+                    0,
+                    buildText {
+                        info("Du spielst auf".toSmallCaps())
+                    }
+                )
+            }
+            hotbarRight(1) {
+                element(
+                    "watermark1",
+                    0,
+                    buildText {
+                        note("castcrafter.de".toSmallCaps())
+                    }
+                )
+            }
+        }
     }
 
     fun actionBar(player: Player) {
